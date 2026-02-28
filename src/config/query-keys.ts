@@ -26,4 +26,8 @@ export const queryKeys = {
     fullText: (query: string) => ['search', 'fullText', query] as const,
     semantic: (query: string) => ['search', 'semantic', query] as const,
   },
+  chat: {
+    conversations: ['chat', 'conversations'] as const,
+    conversation: (id: string) => ['chat', 'conversation', id] as const,
+  },
 }

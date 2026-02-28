@@ -14,6 +14,7 @@ export const ROUTES = {
   BOOKING_REVIEW: '/bookings/:id/review',
 
   PROFILE: '/profile',
+  CHAT: '/chat',
 
   ADMIN: '/admin',
   ADMIN_HOTELS: '/admin/hotels',

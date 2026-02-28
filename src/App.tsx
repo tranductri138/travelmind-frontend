@@ -18,6 +18,7 @@ import { MyBookingsPage } from '@/pages/user/MyBookingsPage'
 import { BookingDetailPage } from '@/pages/user/BookingDetailPage'
 import { ProfilePage } from '@/pages/user/ProfilePage'
 import { WriteReviewPage } from '@/pages/user/WriteReviewPage'
+import { ChatPage } from '@/pages/user/ChatPage'
 
 // Admin pages
 import { DashboardPage } from '@/pages/admin/DashboardPage'
@@ -47,6 +48,7 @@ function App() {
               <Route path="/bookings/:id" element={<BookingDetailPage />} />
               <Route path="/bookings/:id/review" element={<WriteReviewPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/chat" element={<ChatPage />} />
             </Route>
 
             {/* Admin routes */}

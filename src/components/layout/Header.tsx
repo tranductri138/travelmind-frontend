@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, Menu, Moon, Sun, LogOut, User, LayoutDashboard } from 'lucide-react'
+import { Search, Menu, Moon, Sun, LogOut, User, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -44,6 +44,11 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          {isAuthenticated && (
+            <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.CHAT)} title="AI Chat">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" onClick={() => navigate(ROUTES.SEARCH)}>
             <Search className="h-5 w-5" />
           </Button>
