@@ -22,7 +22,7 @@
 13. [Hotel Components](#13-hotel-components)
 14. [Room Components](#14-room-components)
 15. [Booking Components](#15-booking-components)
-16. [Payment Components (Stripe)](#16-payment-components-stripe)
+16. [Payment Components (LianLian Bank)](#16-payment-components-lianlian-bank)
 17. [Review Components](#17-review-components)
 18. [Search Components](#18-search-components)
 19. [Common/Shared Components](#19-commonshared-components)
@@ -74,7 +74,7 @@
 - **Axios** (HTTP client với JWT interceptor)
 - **React Router 7** (routing, protected routes)
 - **React Hook Form + Zod** (form + validation)
-- **Stripe Elements** (thanh toán)
+- **LianLian Bank payment form** (thanh toán)
 - **Leaflet** (bản đồ)
 
 ---
@@ -139,13 +139,11 @@ createRoot(document.getElementById('root')!).render(
 ```typescript
 const envSchema = z.object({
   VITE_API_URL: z.string().url(),                    // Phải là URL hợp lệ
-  VITE_STRIPE_PUBLISHABLE_KEY: z.string().min(1),    // Không được rỗng
 });
 
 // .parse() sẽ throw ZodError nếu validation fail
 export const env = envSchema.parse({
   VITE_API_URL: import.meta.env.VITE_API_URL,
-  VITE_STRIPE_PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
 });
 ```
 
@@ -561,7 +559,7 @@ export const hotelApi = {
 export const bookingApi = {
   create: (data: CreateBookingRequest) =>
     apiClient.post<ApiResponse<CreateBookingResponse>>('/bookings', data),
-    // Response chứa { booking, clientSecret } - clientSecret dùng cho Stripe
+    // Response chứa booking — sau đó gọi initiate để lấy transactionId
 
   cancel: (id: string) =>
     apiClient.patch<ApiResponse<Booking>>(`/bookings/${id}/cancel`),
@@ -635,10 +633,17 @@ interface Booking {
   room?: Room;
 }
 
-// Response khi tạo booking - chứa clientSecret cho Stripe
+// Response khi tạo booking
 interface CreateBookingResponse {
   booking: Booking;
-  clientSecret: string;  // Stripe payment intent secret
+}
+
+// Response khi initiate payment - chứa transactionId cho LianLian Bank
+interface InitiatePaymentResponse {
+  transactionId: string;  // LianLian Bank transaction ID
+  amount: number;
+  currency: string;
+  bankInfo: object;
 }
 ```
 
@@ -1467,41 +1472,37 @@ function CancelDialog({ onConfirm, isPending }) {
 
 ---
 
-## 16. Payment Components (Stripe)
+## 16. Payment Components (LianLian Bank)
 
-### 16.1 StripeCheckout - Form thanh toán
+### 16.1 LianLianCheckout - Form thanh toán
 
 ```typescript
-function StripeCheckout({ onSuccess }) {
-  const stripe = useStripe();       // Stripe.js instance
-  const elements = useElements();   // Stripe Elements instance
+function LianLianCheckout({ transactionId, amount, currency, bankInfo, onSuccess }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/bookings`,
-      },
-      redirect: 'if_required',  // Chỉ redirect nếu cần (3D Secure)
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-    } else if (paymentIntent?.status === 'succeeded') {
+  const handleConfirm = async () => {
+    setIsProcessing(true);
+    try {
+      await paymentApi.confirm(transactionId);
       onSuccess();  // Thanh toán thành công → redirect
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <PaymentElement />  {/* Stripe tự render form thẻ */}
-      <Button type="submit" disabled={!stripe || isProcessing}>
-        Pay Now
+    <div>
+      <h3>LianLian Bank Payment</h3>
+      <p>Amount: {formatCurrency(amount, currency)}</p>
+      <p>Bank: {bankInfo.bankName}</p>
+      <p>Transaction ID: {transactionId}</p>
+      <Button onClick={handleConfirm} disabled={isProcessing}>
+        Confirm Payment
       </Button>
-    </form>
+    </div>
   );
 }
 ```
@@ -1509,15 +1510,12 @@ function StripeCheckout({ onSuccess }) {
 **Payment flow:**
 
 ```
-1. BookingPage tạo booking → API trả clientSecret
-2. Load Stripe Elements với clientSecret
-3. User nhập thông tin thẻ vào PaymentElement
-4. Submit → stripe.confirmPayment()
-5. Stripe xử lý thanh toán:
-   ├── Cần 3D Secure → redirect → quay lại
-   └── Không cần → trả kết quả ngay
-6. paymentIntent.status === 'succeeded' → onSuccess()
-7. Navigate đến BookingDetailPage
+1. BookingPage tạo booking → POST /bookings
+2. POST /payments/initiate/:bookingId → returns { transactionId, amount, currency, bankInfo }
+3. User sees bank details in LianLianCheckout
+4. User clicks "Confirm Payment"
+5. POST /payments/confirm/:transactionId → payment confirmed
+6. onSuccess() → Navigate đến BookingDetailPage
 ```
 
 ---
@@ -1803,23 +1801,30 @@ function BookingPage() {
 
   // STATE MACHINE
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<InitiatePaymentResponse | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
-  // Bước 2 → Bước 3: Submit booking → lấy clientSecret
+  // Bước 2 → Bước 3: Submit booking → initiate payment → lấy transactionId
   const handleBookingSubmit = async (data: CreateBookingRequest) => {
     const result = await createBooking.mutateAsync(data);
-    setClientSecret(result.clientSecret);
     setBookingId(result.booking.id);
+    const payment = await paymentApi.initiate(result.booking.id);
+    setTransactionId(payment.transactionId);
+    setPaymentInfo(payment);
   };
 
   // RENDER theo state
-  if (clientSecret) {
-    // BƯỚC 3: Thanh toán Stripe
+  if (transactionId && paymentInfo) {
+    // BƯỚC 3: Thanh toán LianLian Bank
     return (
-      <Elements stripe={stripePromise} options={{ clientSecret }}>
-        <StripeCheckout onSuccess={() => navigate(bookingDetailPath(bookingId!))} />
-      </Elements>
+      <LianLianCheckout
+        transactionId={transactionId}
+        amount={paymentInfo.amount}
+        currency={paymentInfo.currency}
+        bankInfo={paymentInfo.bankInfo}
+        onSuccess={() => navigate(bookingDetailPath(bookingId!))}
+      />
     );
   }
 
@@ -1836,21 +1841,22 @@ function BookingPage() {
 **State machine flow:**
 
 ```
-State 1: selectedRoom=null, clientSecret=null
+State 1: selectedRoom=null, transactionId=null
   → Hiện RoomList
   → User click "Book Now" trên RoomCard
   → setSelectedRoom(room)
 
-State 2: selectedRoom=Room, clientSecret=null
+State 2: selectedRoom=Room, transactionId=null
   → Hiện BookingForm
   → User chọn ngày, số khách, submit
-  → createBooking → API trả clientSecret
-  → setClientSecret(secret)
+  → createBooking → POST /bookings
+  → paymentApi.initiate(bookingId) → returns transactionId
+  → setTransactionId(id)
 
-State 3: clientSecret="pi_xxx_secret_yyy"
-  → Hiện StripeCheckout (Stripe Elements)
-  → User nhập thẻ, submit
-  → stripe.confirmPayment()
+State 3: transactionId="txn_xxx"
+  → Hiện LianLianCheckout (bank details + confirm button)
+  → User xem thông tin ngân hàng, click "Confirm Payment"
+  → paymentApi.confirm(transactionId)
   → Thành công → navigate("/bookings/{id}")
 ```
 
@@ -1999,21 +2005,20 @@ const checkStatus = async () => {
 │  5. User chọn ngày check-in/out, số khách                      │
 │     → PriceBreakdown tự tính: $150 × 3 nights + 10% tax        │
 │     → Submit → createBooking.mutateAsync()                      │
-│     → POST /bookings → Backend tạo booking + PaymentIntent      │
-│     → Response: { booking, clientSecret }                       │
+│     → POST /bookings → Backend tạo booking (PENDING)            │
+│     → Response: { booking }                                     │
 │                                                                 │
-│  6. setClientSecret() → BƯỚC 3: StripeCheckout                 │
-│     → Stripe Elements load với clientSecret                     │
-│     → User nhập thông tin thẻ                                   │
-│     → Submit → stripe.confirmPayment()                          │
+│  6. POST /payments/initiate/:bookingId                          │
+│     → Response: { transactionId, amount, currency, bankInfo }   │
+│     → setTransactionId() → BƯỚC 3: LianLianCheckout             │
 │                                                                 │
-│  7. Stripe xử lý thanh toán                                    │
-│     ├── Cần 3D Secure → redirect → xác thực → quay lại         │
-│     └── Thành công → paymentIntent.status = 'succeeded'         │
+│  7. User xem bank details, click "Confirm Payment"              │
+│     → POST /payments/confirm/:transactionId                     │
+│     → Payment confirmed                                         │
 │                                                                 │
 │  8. onSuccess() → navigate /bookings/{id}                       │
-│     → BookingDetailPage hiện BookingTimeline (PENDING)           │
-│     → Backend webhook confirm → status = CONFIRMED               │
+│     → BookingDetailPage hiện BookingTimeline                     │
+│     → Booking status = CONFIRMED                                │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -2094,7 +2099,7 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query', 'zustand', 'axios'],
           'vendor-ui': [/* Radix UI packages */],
           'vendor-forms': ['react-hook-form', 'zod'],
-          'vendor-stripe': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
+          // No external payment SDK needed — LianLian Bank uses internal API calls
           'vendor-maps': ['leaflet', 'react-leaflet'],
           'vendor-utils': ['date-fns', 'lucide-react'],
         },
@@ -2228,7 +2233,7 @@ server {
 │                          ├── Auth (JWT)                                │
 │                          ├── Hotels CRUD                               │
 │                          ├── Rooms CRUD                                │
-│                          ├── Bookings + Stripe                         │
+│                          ├── Bookings + LianLian Bank                   │
 │                          ├── Reviews CRUD                              │
 │                          ├── Search (ES + AI)                          │
 │                          └── Crawler                                   │

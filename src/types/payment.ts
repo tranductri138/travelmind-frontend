@@ -1,9 +1,13 @@
-export interface PaymentIntent {
-  id: string
-  clientSecret: string
+export interface PaymentInitiation {
+  transactionId: string
   amount: number
   currency: string
-  status: string
+  bankInfo: {
+    bankName: string
+    accountNumber: string
+    accountHolder: string
+    routingCode: string
+  }
 }
 
 export interface CreatePaymentRequest {

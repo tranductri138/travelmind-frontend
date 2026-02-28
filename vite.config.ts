@@ -27,7 +27,6 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query', 'zustand', 'axios'],
           'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select', '@radix-ui/react-tabs', '@radix-ui/react-popover', '@radix-ui/react-alert-dialog'],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-stripe': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
           'vendor-maps': ['leaflet', 'react-leaflet'],
           'vendor-utils': ['date-fns', 'lucide-react', 'clsx', 'tailwind-merge', 'class-variance-authority'],
         },

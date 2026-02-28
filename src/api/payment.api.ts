@@ -1,9 +1,15 @@
 import { apiClient } from './client'
-import type { PaymentIntent, CreatePaymentRequest } from '@/types/payment'
+import type { PaymentInitiation } from '@/types/payment'
 import type { ApiResponse } from '@/types/common'
 
 export const paymentApi = {
-  createIntent(data: CreatePaymentRequest) {
-    return apiClient.post<ApiResponse<PaymentIntent>>('/payments/intent', data)
+  initiate(bookingId: string) {
+    return apiClient.post<ApiResponse<PaymentInitiation>>(`/payments/initiate/${bookingId}`)
+  },
+
+  confirm(transactionId: string) {
+    return apiClient.post<ApiResponse<{ status: string; bookingId: string }>>(
+      `/payments/confirm/${transactionId}`,
+    )
   },
 }

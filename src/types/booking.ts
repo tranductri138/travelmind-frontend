@@ -28,5 +28,4 @@ export interface CreateBookingRequest {
 
 export interface CreateBookingResponse {
   booking: Booking
-  clientSecret: string
 }

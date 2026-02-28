@@ -2,7 +2,6 @@ import { z } from 'zod/v4'
 
 const envSchema = z.object({
   VITE_API_URL: z.string().url(),
-  VITE_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
 })
 
 function getEnv() {

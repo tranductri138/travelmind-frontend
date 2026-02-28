@@ -20,7 +20,7 @@ NestJS Backend (port 3000)    ← Là gateway duy nhất
 PostgreSQL  RabbitMQ ──► Python AI (port 8000)
 Redis       Qdrant
 Elasticsearch
-Stripe
+LianLian Bank
 ```
 
 ---
@@ -40,7 +40,7 @@ Stripe
 | Forms | React Hook Form + Zod | Performance (uncontrolled), validation schema share được với backend |
 | HTTP | Axios | Interceptors cho JWT refresh, error handling |
 | Maps | Leaflet / Mapbox GL | Hiển thị hotels trên bản đồ |
-| Payment | Stripe Elements (@stripe/react-stripe-js) | PCI compliant, embed form thanh toán |
+| Payment | LianLian Bank payment form (no external SDK) | Simulated bank transfer, no PCI scope |
 | Date | date-fns | Tree-shakable, immutable |
 | Icons | Lucide React | Consistent, tree-shakable |
 | Testing | Vitest + Testing Library | Nhanh, compatible Vite |
@@ -84,7 +84,7 @@ travelmind-web/
 │   │   ├── hotel.api.ts            # list, detail, nearby, create, update, delete, hardDelete
 │   │   ├── room.api.ts             # listByHotel, checkAvailability, create, delete, hardDelete
 │   │   ├── booking.api.ts          # create, list, detail, cancel, delete
-│   │   ├── payment.api.ts          # createIntent
+│   │   ├── payment.api.ts          # initiate, confirm
 │   │   ├── review.api.ts           # listByHotel, create, delete
 │   │   └── search.api.ts           # fullText, semantic (NestJS proxy AI)
 │   │
@@ -157,7 +157,7 @@ travelmind-web/
 │   │   │   └── CancelDialog.tsx
 │   │   │
 │   │   ├── payment/
-│   │   │   ├── StripeCheckout.tsx    # Stripe Elements wrapper
+│   │   │   ├── LianLianCheckout.tsx  # LianLian Bank payment form
 │   │   │   └── PaymentStatus.tsx
 │   │   │
 │   │   ├── review/
@@ -191,7 +191,7 @@ travelmind-web/
 │   │   │   └── RegisterPage.tsx          # POST /auth/register
 │   │   │
 │   │   ├── user/                    # Cần login (role: USER)
-│   │   │   ├── BookingPage.tsx           # POST /bookings — form đặt phòng + Stripe
+│   │   │   ├── BookingPage.tsx           # POST /bookings — form đặt phòng + LianLian Bank
 │   │   │   ├── MyBookingsPage.tsx        # GET /bookings — lịch sử booking
 │   │   │   ├── BookingDetailPage.tsx     # GET /bookings/:id — chi tiết + cancel
 │   │   │   ├── ProfilePage.tsx           # GET + PATCH /users/me
@@ -240,7 +240,7 @@ Mỗi page map trực tiếp với 1 hoặc nhiều API endpoints từ NestJS Ba
 
 | Page | Route | API Calls | Mô tả |
 |------|-------|-----------|-------|
-| BookingPage | `/hotels/:id/book` | `GET /hotels/:id/rooms` + `POST /bookings` + `POST /payments/intent` | Chọn room, dates, guests → tạo booking → Stripe checkout |
+| BookingPage | `/hotels/:id/book` | `GET /hotels/:id/rooms` + `POST /bookings` + `POST /payments/initiate/:bookingId` | Chọn room, dates, guests → tạo booking → LianLian Bank checkout |
 | MyBookingsPage | `/bookings` | `GET /bookings?page&status` | Lịch sử booking, filter theo status |
 | BookingDetailPage | `/bookings/:id` | `GET /bookings/:id` + `PATCH /bookings/:id/cancel` + `DELETE /bookings/:id` | Chi tiết + timeline + hủy/xóa booking |
 | ProfilePage | `/profile` | `GET /users/me` + `PATCH /users/me` + `DELETE /users/me` | Xem/sửa thông tin cá nhân, xóa tài khoản |
@@ -295,21 +295,23 @@ Khi user tạo booking:
 ### Booking + Payment Flow
 
 ```
-HotelDetailPage                    BookingPage                     Stripe
+HotelDetailPage                    BookingPage                   LianLian Bank
       │                                │                              │
       │ User click "Đặt phòng"        │                              │
       ├───────────────────────────────►│                              │
       │                                │                              │
       │                    Chọn room + dates + guests                 │
       │                    POST /bookings                             │
-      │                    → booking (PENDING) + Stripe clientSecret  │
+      │                    → booking (PENDING)                        │
       │                                │                              │
-      │                    Render <StripeCheckout>                    │
-      │                    stripe.confirmPayment(clientSecret)        │
-      │                                ├─────────────────────────────►│
+      │                    POST /payments/initiate/:bookingId         │
+      │                    → { transactionId, amount, currency, bankInfo }
       │                                │                              │
-      │                                │    payment_intent.succeeded  │
-      │                                │    (webhook → NestJS)        │
+      │                    Render <LianLianCheckout>                  │
+      │                    User sees bank details, clicks "Confirm"   │
+      │                                │                              │
+      │                    POST /payments/confirm/:transactionId      │
+      │                    → payment confirmed                        │
       │                                │                              │
       │                    Booking status: CONFIRMED                  │
       │                    Redirect → BookingDetailPage               │
