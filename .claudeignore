@@ -1,0 +1,17 @@
+# Docs quá dài, dùng docs/claude/*.md thay thế
+ARCHITECTURE.md
+README.md
+
+# Lib utilities nhỏ, không cần context riêng
+src/lib/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE, OS
+.idea/
+.vscode/
+*.DS_Store
