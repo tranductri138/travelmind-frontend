@@ -14,7 +14,7 @@
 | `booking.api.ts` | create, myList, detail, cancel, adminList |
 | `payment.api.ts` | initiate(bookingId), confirm(transactionId) |
 | `review.api.ts` | listByHotel, create, update, delete |
-| `search.api.ts` | fullText (GET /search), semantic (POST /search/semantic) |
+| `search.api.ts` | search (GET /search — unified keyword + semantic) |
 | `chat.api.ts` | listConversations, getConversation, deleteConversation |
 | `user.api.ts` | getProfile, updateProfile, deleteAccount |
 

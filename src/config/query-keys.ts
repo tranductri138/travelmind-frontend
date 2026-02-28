@@ -23,8 +23,8 @@ export const queryKeys = {
       ['reviews', 'byHotel', hotelId, params] as const,
   },
   search: {
-    fullText: (query: string) => ['search', 'fullText', query] as const,
-    semantic: (query: string) => ['search', 'semantic', query] as const,
+    all: ['search'] as const,
+    query: (q: string) => ['search', 'query', q] as const,
   },
   chat: {
     conversations: ['chat', 'conversations'] as const,

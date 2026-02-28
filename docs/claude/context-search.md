@@ -1,29 +1,29 @@
 # Context: Search
 
-## Dual-mode search
-Chạy song song 2 engine, merge kết quả:
+## Unified search
+BE chạy song song keyword + semantic, merge & deduplicate, FE chỉ gọi 1 API:
 
 ```
 User gõ query
-    ├→ GET /search?q=...          (Elasticsearch full-text)
-    └→ POST /search/semantic      (AI vector search)
+    → GET /search?q=...
          ↓
-    Merge + deduplicate by hotelId
+    BE: Promise.allSettled([keyword, semantic])
+    BE: merge (semantic trước, keyword sau), deduplicate by hotel.id
+         ↓
+    FE nhận kết quả đã merge
     Semantic results → gắn badge "AI-powered"
     Render SearchResults
 ```
 
 ## API (`src/api/search.api.ts`)
 ```ts
-searchApi.fullText({ q, page, limit, ... })   // Elasticsearch
-searchApi.semantic({ query, limit })           // AI vector search
+searchApi.search({ q, page, limit })   // GET /search — unified (keyword + semantic)
 ```
 
 ## Hook (`src/hooks/useSearch.ts`)
 ```ts
-const { results, isLoading, keyword, semantic } = useSearch(query)
-// Dùng Promise.allSettled để cả 2 fail độc lập
-// Debounce query 300ms (useDebounce hook)
+const { data, isLoading } = useSearch(query, { page, limit })
+// Debounce query 300ms (useDebounce hook) ở page level
 ```
 
 ## Components (`src/components/search/`)
@@ -32,16 +32,14 @@ const { results, isLoading, keyword, semantic } = useSearch(query)
 - `SemanticBadge` — badge "AI-powered" gắn lên semantic results
 
 ## Page: `src/pages/public/SearchResultsPage.tsx`
-- Đọc `?q=` từ URL → gọi `useSearch(q)`
+- Đọc `?q=` từ URL → debounce → gọi `useSearch(q)`
 - Không cần login (public route)
 
 ## Types (`src/types/search.ts`)
 ```ts
 interface SearchResult {
-  hotelId: string
-  name: string
+  hotel: Hotel
   score: number
   source: 'keyword' | 'semantic'
-  // ...hotel fields
 }
 ```

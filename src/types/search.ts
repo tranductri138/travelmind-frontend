@@ -12,6 +12,3 @@ export interface SearchResult {
   source: 'keyword' | 'semantic'
 }
 
-export interface SemanticSearchRequest {
-  query: string
-}
