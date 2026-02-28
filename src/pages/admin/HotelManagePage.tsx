@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, BedDouble } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
@@ -17,7 +17,7 @@ import {
 import { Pagination } from '@/components/common/Pagination'
 import { TableSkeleton } from '@/components/common/LoadingSkeleton'
 import { useHotels, useDeleteHotel } from '@/hooks/useHotels'
-import { adminHotelEditPath, ROUTES } from '@/config/routes'
+import { adminHotelEditPath, adminHotelRoomsPath, ROUTES } from '@/config/routes'
 import { formatCurrency } from '@/lib/format'
 
 export function HotelManagePage() {
@@ -54,10 +54,13 @@ export function HotelManagePage() {
                   <TableCell className="font-medium">{hotel.name}</TableCell>
                   <TableCell>{hotel.city}, {hotel.country}</TableCell>
                   <TableCell>{hotel.rating.toFixed(1)}</TableCell>
-                  <TableCell>{formatCurrency(hotel.priceMin)}</TableCell>
+                  <TableCell>{hotel.priceMin ? formatCurrency(hotel.priceMin) : '—'}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Link to={adminHotelEditPath(hotel.id)}>
+                      <Link to={adminHotelRoomsPath(hotel.id)} title="Manage Rooms">
+                        <Button variant="ghost" size="icon"><BedDouble className="h-4 w-4" /></Button>
+                      </Link>
+                      <Link to={adminHotelEditPath(hotel.id)} title="Edit Hotel">
                         <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
                       </Link>
                       <AlertDialog>

@@ -25,7 +25,7 @@ export function RoomCard({ room, onBook }: RoomCardProps) {
         <p className="text-sm text-muted-foreground mt-2">{room.description}</p>
         <div className="flex items-center gap-2 mt-3">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">Up to {room.capacity} guests</span>
+          <span className="text-sm">Up to {room.maxGuests} guests</span>
         </div>
         {room.amenities.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
@@ -39,10 +39,10 @@ export function RoomCard({ room, onBook }: RoomCardProps) {
         <CardFooter className="p-4 pt-0">
           <Button
             className="w-full"
-            disabled={!room.isAvailable}
+            disabled={!room.isActive}
             onClick={() => onBook(room)}
           >
-            {room.isAvailable ? 'Book Now' : 'Unavailable'}
+            {room.isActive ? 'Book Now' : 'Unavailable'}
           </Button>
         </CardFooter>
       )}

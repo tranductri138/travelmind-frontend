@@ -35,4 +35,14 @@ export const hotelApi = {
   hardDelete(id: string) {
     return apiClient.delete(`/hotels/${id}/permanent`)
   },
+
+  uploadImages(files: File[]) {
+    const formData = new FormData()
+    files.forEach((file) => formData.append('images', file))
+    return apiClient.post<{ success: boolean; data: string[] }>(
+      '/upload/hotel-images',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+  },
 }

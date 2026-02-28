@@ -26,6 +26,7 @@ import { HotelManagePage } from '@/pages/admin/HotelManagePage'
 import { HotelFormPage } from '@/pages/admin/HotelFormPage'
 import { BookingManagePage } from '@/pages/admin/BookingManagePage'
 import { CrawlerPage } from '@/pages/admin/CrawlerPage'
+import { RoomManagePage } from '@/pages/admin/RoomManagePage'
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/admin/hotels" element={<HotelManagePage />} />
                 <Route path="/admin/hotels/new" element={<HotelFormPage />} />
                 <Route path="/admin/hotels/:id/edit" element={<HotelFormPage />} />
+                <Route path="/admin/hotels/:id/rooms" element={<RoomManagePage />} />
                 <Route path="/admin/bookings" element={<BookingManagePage />} />
                 <Route path="/admin/crawler" element={<CrawlerPage />} />
               </Route>

@@ -5,10 +5,11 @@ export interface Room {
   description: string
   type: string
   price: number
-  capacity: number
+  currency: string
+  maxGuests: number
   amenities: string[]
   images: string[]
-  isAvailable: boolean
+  isActive: boolean
   createdAt: string
   updatedAt: string
 }
@@ -16,10 +17,11 @@ export interface Room {
 export interface CreateRoomRequest {
   hotelId: string
   name: string
-  description: string
+  description?: string
   type: string
   price: number
-  capacity: number
+  currency?: string
+  maxGuests?: number
   amenities?: string[]
   images?: string[]
 }

@@ -18,7 +18,7 @@ export function SearchResultsPage() {
   const { data: keywordData, isLoading: keywordLoading } = useFullTextSearch(debouncedQuery)
   const { data: semanticData, isLoading: semanticLoading } = useSemanticSearch(debouncedQuery)
 
-  const isLoading = keywordLoading || semanticLoading
+  const isLoading = keywordLoading && semanticLoading
 
   // Merge and deduplicate results
   const allResults: SearchResult[] = []

@@ -48,7 +48,7 @@ export function BookingForm({ room, onSubmit, isPending }: BookingFormProps) {
           id="guests"
           type="number"
           min={1}
-          max={room.capacity}
+          max={room.maxGuests}
           value={guests}
           onChange={(e) => setGuests(Number(e.target.value))}
         />

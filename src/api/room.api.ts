@@ -11,15 +11,15 @@ export const roomApi = {
     return apiClient.post<ApiResponse<CheckAvailabilityResponse>>('/rooms/availability', data)
   },
 
-  create(data: CreateRoomRequest) {
-    return apiClient.post<ApiResponse<Room>>('/rooms', data)
+  create(hotelId: string, data: Omit<CreateRoomRequest, 'hotelId'>) {
+    return apiClient.post<ApiResponse<Room>>(`/hotels/${hotelId}/rooms`, data)
   },
 
-  delete(id: string) {
-    return apiClient.delete(`/rooms/${id}`)
+  delete(hotelId: string, roomId: string) {
+    return apiClient.delete(`/hotels/${hotelId}/rooms/${roomId}`)
   },
 
-  hardDelete(id: string) {
-    return apiClient.delete(`/rooms/${id}/permanent`)
+  hardDelete(hotelId: string, roomId: string) {
+    return apiClient.delete(`/hotels/${hotelId}/rooms/${roomId}/permanent`)
   },
 }

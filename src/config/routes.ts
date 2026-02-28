@@ -20,6 +20,7 @@ export const ROUTES = {
   ADMIN_HOTELS: '/admin/hotels',
   ADMIN_HOTEL_NEW: '/admin/hotels/new',
   ADMIN_HOTEL_EDIT: '/admin/hotels/:id/edit',
+  ADMIN_HOTEL_ROOMS: '/admin/hotels/:id/rooms',
   ADMIN_BOOKINGS: '/admin/bookings',
   ADMIN_CRAWLER: '/admin/crawler',
 } as const
@@ -42,4 +43,8 @@ export function bookingReviewPath(id: string) {
 
 export function adminHotelEditPath(id: string) {
   return `/admin/hotels/${id}/edit`
+}
+
+export function adminHotelRoomsPath(id: string) {
+  return `/admin/hotels/${id}/rooms`
 }

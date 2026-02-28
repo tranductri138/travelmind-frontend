@@ -91,7 +91,7 @@ export function BookingPage() {
               <CardContent className="space-y-2">
                 <p className="font-medium">{selectedRoom.name}</p>
                 <p className="text-sm text-muted-foreground">{selectedRoom.type}</p>
-                <p className="text-sm">Up to {selectedRoom.capacity} guests</p>
+                <p className="text-sm">Up to {selectedRoom.maxGuests} guests</p>
               </CardContent>
             </Card>
           )}

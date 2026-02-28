@@ -30,4 +30,9 @@ export const queryKeys = {
     conversations: ['chat', 'conversations'] as const,
     conversation: (id: string) => ['chat', 'conversation', id] as const,
   },
+  crawler: {
+    all: ['crawler'] as const,
+    list: ['crawler', 'list'] as const,
+    detail: (id: string) => ['crawler', 'detail', id] as const,
+  },
 }
