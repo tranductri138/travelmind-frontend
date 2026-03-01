@@ -572,7 +572,7 @@ export const bookingApi = {
 export const searchApi = {
   fullText: (params: SearchQuery) =>
     apiClient.get<PaginatedResponse<SearchResult>>('/search', { params }),
-    // Elasticsearch full-text search
+    // PostgreSQL full-text search
 
   semantic: (data: SemanticSearchRequest) =>
     apiClient.post<ApiResponse<SearchResult[]>>('/search/semantic', data),
@@ -1771,7 +1771,7 @@ function SearchResultsPage() {
 ```
 Query: "beach resort bali"
     │
-    ├── Elasticsearch: [Hotel A, Hotel B, Hotel C, Hotel D]
+    ├── PostgreSQL:     [Hotel A, Hotel B, Hotel C, Hotel D]
     │                   source='keyword'
     │
     └── AI Semantic:   [Hotel B, Hotel E, Hotel F]
@@ -2038,7 +2038,7 @@ const checkStatus = async () => {
 │                                                                 │
 │     ┌─ useFullTextSearch ──────────────────────────┐             │
 │     │ GET /search?q=beach+resort+bali              │             │
-│     │ → Elasticsearch full-text match              │             │
+│     │ → PostgreSQL full-text match                 │             │
 │     │ → Trả: [Hotel A, B, C, D] source='keyword'  │             │
 │     └──────────────────────────────────────────────┘             │
 │                                                                 │

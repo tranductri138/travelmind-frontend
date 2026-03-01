@@ -13,7 +13,7 @@ import { useState } from 'react'
 export function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const { data: conversations = [], refetch: refetchConversations } = useConversations()
   const { data: conversationDetail } = useConversation(selectedConvId)
@@ -46,9 +46,14 @@ export function ChatPage() {
     }
   }, [activeConversationId, selectedConvId, refetchConversations])
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom within the chat scroll area only
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const viewport = scrollAreaRef.current?.querySelector<HTMLDivElement>(
+      '[data-radix-scroll-area-viewport]',
+    )
+    if (viewport) {
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' })
+    }
   }, [messages, streamingContent])
 
   const handleSend = useCallback(
@@ -121,7 +126,7 @@ export function ChatPage() {
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
           <div className="max-w-3xl mx-auto space-y-4">
             {messages.length === 0 && !isTyping && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -152,7 +157,6 @@ export function ChatPage() {
               </div>
             )}
 
-            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 

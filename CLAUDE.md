@@ -32,7 +32,7 @@ Trước mỗi task, đọc các file phù hợp trong `docs/claude/`:
 | API, Axios, fetch, hook, useQuery, useMutation, type, DTO | `context-api.md` |
 | chat, socket, message, stream, conversation, AI | `context-chat.md` |
 | payment, booking flow, LianLian, transaction | `context-payment.md` |
-| search, Elasticsearch, semantic, vector | `context-search.md` |
+| search, semantic, vector | `context-search.md` |
 | route, page, component, UI, layout, form, build, docker | `context-ui.md` |
 
 **Quy tắc:** Đọc file trước, sau đó mới bắt đầu viết code. Nếu task liên quan nhiều mảng thì đọc nhiều file.

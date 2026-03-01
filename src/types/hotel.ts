@@ -36,12 +36,14 @@ export interface UpdateHotelRequest extends Partial<CreateHotelRequest> {}
 export interface SearchHotelParams {
   page?: number
   limit?: number
-  sort?: string
-  minPrice?: number
-  maxPrice?: number
-  rating?: number
-  amenities?: string[]
+  q?: string
   city?: string
   country?: string
-  featured?: boolean
+  minPrice?: number
+  maxPrice?: number
+  minStars?: number
+  minRating?: number
+  amenities?: string[]
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }

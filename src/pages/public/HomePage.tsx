@@ -4,7 +4,7 @@ import { HotelGridSkeleton } from '@/components/common/LoadingSkeleton'
 import { useHotels } from '@/hooks/useHotels'
 
 export function HomePage() {
-  const { data, isLoading } = useHotels({ featured: true, limit: 8 })
+  const { data, isLoading } = useHotels({ limit: 8, sortBy: 'rating', sortOrder: 'desc' })
 
   return (
     <div>

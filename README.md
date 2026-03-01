@@ -19,7 +19,6 @@ NestJS Backend (port 3000)    ← Là gateway duy nhất
     ▼         ▼
 PostgreSQL  RabbitMQ ──► Python AI (port 8000)
 Redis       Qdrant
-Elasticsearch
 LianLian Bank
 ```
 
@@ -232,7 +231,7 @@ Mỗi page map trực tiếp với 1 hoặc nhiều API endpoints từ NestJS Ba
 | HomePage | `/` | `GET /hotels?featured=true&limit=8` | Landing page, search bar, featured hotels |
 | HotelListPage | `/hotels` | `GET /hotels?page&limit&sort&minPrice&maxPrice&rating&amenities` | Grid + filters + pagination + map toggle |
 | HotelDetailPage | `/hotels/:id` | `GET /hotels/:id` + `GET /hotels/:id/rooms` + `GET /reviews?hotelId=:id` | Full detail: gallery, rooms, reviews, map location |
-| SearchResultsPage | `/search?q=...` | `GET /search?q=...` (Elasticsearch) + `POST /search/semantic` (AI qua NestJS proxy) | Kết quả kết hợp keyword + semantic search |
+| SearchResultsPage | `/search?q=...` | `GET /search?q=...` (PostgreSQL + AI semantic) | Kết quả kết hợp keyword + semantic search |
 | LoginPage | `/login` | `POST /auth/login` | Form login → JWT tokens → redirect |
 | RegisterPage | `/register` | `POST /auth/register` | Form đăng ký |
 
@@ -326,7 +325,7 @@ SearchBar (user gõ)
     ▼
 SearchResultsPage
     │
-    ├── GET /search?q=... (Elasticsearch full-text)    → keyword results
+    ├── GET /search?q=... (PostgreSQL full-text)        → keyword results
     │
     └── POST /search/semantic (NestJS proxy → AI)      → semantic results
           body: { query: "..." }
