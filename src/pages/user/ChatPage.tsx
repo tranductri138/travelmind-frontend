@@ -14,6 +14,7 @@ export function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const loadedConvIdRef = useRef<string | null>(null)
 
   const { data: conversations = [], refetch: refetchConversations } = useConversations()
   const { data: conversationDetail } = useConversation(selectedConvId)
@@ -30,9 +31,10 @@ export function ChatPage() {
     clearMessages,
   } = useChatSocket()
 
-  // When a conversation is loaded from API, sync messages
+  // When a conversation is loaded from API, sync messages (guard with ref to prevent loops)
   useEffect(() => {
-    if (conversationDetail?.messages) {
+    if (conversationDetail && conversationDetail.id !== loadedConvIdRef.current) {
+      loadedConvIdRef.current = conversationDetail.id
       loadMessages(conversationDetail.messages)
       setActiveConversationId(conversationDetail.id)
     }
@@ -65,6 +67,7 @@ export function ChatPage() {
 
   const handleNewChat = useCallback(() => {
     setSelectedConvId(null)
+    loadedConvIdRef.current = null
     clearMessages()
   }, [clearMessages])
 
