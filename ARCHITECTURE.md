@@ -2129,30 +2129,33 @@ Chia chunks:
 
 ```dockerfile
 # Stage 1: Build
-FROM node:20-alpine AS build
+FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci                          # Install dependencies
 COPY . .
 RUN npm run build                   # tsc check + vite build → dist/
 
 # Stage 2: Serve
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 5001
 ```
 
 **Tại sao multi-stage?**
 - Stage 1 có node_modules (hàng trăm MB) → không cần trong production.
 - Stage 2 chỉ copy dist/ (vài MB) + nginx → image nhẹ (~30MB).
 
+**Port:** Nginx lắng nghe trên port **5001** (không dùng port 80 mặc định) để tránh xung đột với các service khác.
+
 ### 24.3 Nginx Config
 
 ```nginx
 server {
-    listen 80;
+    listen 5001;
     root /usr/share/nginx/html;
+    index index.html;
 
     # SPA routing: Mọi URL trả về index.html
     location / {
@@ -2162,16 +2165,46 @@ server {
 
     # API proxy: Forward /api/* → backend
     location /api/ {
-        proxy_pass http://api:3000/;  # 'api' là tên Docker service
+        proxy_pass http://api:3000;  # 'api' là tên Docker service
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 
     # Cache static assets
-    location ~* \.(js|css|png|jpg|svg|ico)$ {
+    location /assets/ {
         expires 1y;                    # Cache 1 năm
         add_header Cache-Control "public, immutable";
     }
 }
 ```
+
+### 24.4 Chạy container riêng lẻ (run.sh)
+
+Dùng script `run.sh` để build và chạy frontend container độc lập (không cần docker-compose):
+
+```bash
+./run.sh
+```
+
+Script thực hiện:
+1. Xóa container cũ (nếu có) → `docker rm -f travelmind-frontend`
+2. Build image → `docker build -t travelmind-frontend .`
+3. Chạy container → `docker run -d -p 5001:5001 travelmind-frontend`
+
+```bash
+#!/bin/bash
+IMAGE_NAME="travelmind-frontend"
+CONTAINER_NAME="travelmind-frontend"
+PORT=5001
+
+docker rm -f "$CONTAINER_NAME" 2>/dev/null
+docker build -t "$IMAGE_NAME" .
+docker run -d --name "$CONTAINER_NAME" -p "$PORT:$PORT" "$IMAGE_NAME"
+
+echo "Frontend running at http://localhost:$PORT"
+```
+
+**Sau khi chạy:** Truy cập `http://localhost:5001` để xem app.
 
 ---
 

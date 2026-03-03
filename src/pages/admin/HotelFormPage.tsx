@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,11 +34,13 @@ export function HotelFormPage() {
   const [initialized, setInitialized] = useState(false)
 
   // Populate images and amenities when editing
-  if (isEdit && hotel && !initialized) {
-    if (hotel.images?.length) setImageUrls(hotel.images)
-    if (hotel.amenities?.length) setSelectedAmenities(hotel.amenities)
-    setInitialized(true)
-  }
+  useEffect(() => {
+    if (isEdit && hotel && !initialized) {
+      if (hotel.images?.length) setImageUrls(hotel.images)
+      if (hotel.amenities?.length) setSelectedAmenities(hotel.amenities)
+      setInitialized(true)
+    }
+  }, [isEdit, hotel, initialized])
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreateHotelInput>({
     resolver: zodResolver(createHotelSchema),

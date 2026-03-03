@@ -11,16 +11,14 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ allowedRoles }: RoleGuardProps) {
-  const { user, isAuthenticated, setUser } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
 
-  // Wait for user to be fetched if authenticated but user not yet loaded
+  // Reuse the same query key as AppLayout — no setUser here, AppLayout handles sync
   const { isLoading } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
       const { data } = await userApi.getMe()
-      const u = data.data
-      setUser(u)
-      return u
+      return data.data
     },
     enabled: isAuthenticated && !user,
     staleTime: 5 * 60 * 1000,

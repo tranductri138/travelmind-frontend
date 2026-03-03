@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Header } from './Header'
@@ -13,18 +14,21 @@ export function AppLayout() {
   const isAdmin = location.pathname.startsWith('/admin')
   const { isAuthenticated, setUser } = useAuthStore()
 
-  // Fetch user profile when authenticated (needed for RoleGuard, Header avatar, etc.)
-  useQuery({
+  // Fetch user profile when authenticated
+  const { data: userData } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
       const { data } = await userApi.getMe()
-      const user = data.data
-      setUser(user)
-      return user
+      return data.data
     },
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Sync to Zustand outside of queryFn to avoid render-cycle state updates
+  useEffect(() => {
+    if (userData) setUser(userData)
+  }, [userData, setUser])
 
   return (
     <div className="min-h-screen flex flex-col">

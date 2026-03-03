@@ -38,7 +38,8 @@ export function ChatPage() {
       loadMessages(conversationDetail.messages)
       setActiveConversationId(conversationDetail.id)
     }
-  }, [conversationDetail, loadMessages, setActiveConversationId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationDetail])
 
   // When AI responds and creates a new conversation, update the active ID
   useEffect(() => {
@@ -46,7 +47,8 @@ export function ChatPage() {
       setSelectedConvId(activeConversationId)
       refetchConversations()
     }
-  }, [activeConversationId, selectedConvId, refetchConversations])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConversationId])
 
   // Auto-scroll to bottom within the chat scroll area only
   useEffect(() => {

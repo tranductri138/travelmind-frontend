@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '@/api/auth.api'
@@ -16,12 +17,15 @@ export function useAuth() {
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
       const { data } = await userApi.getMe()
-      const user = data.data
-      setUser(user)
-      return user
+      return data.data
     },
     enabled: isAuthenticated,
   })
+
+  // Sync to Zustand outside of queryFn
+  useEffect(() => {
+    if (meQuery.data) setUser(meQuery.data)
+  }, [meQuery.data, setUser])
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),

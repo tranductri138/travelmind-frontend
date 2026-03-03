@@ -81,7 +81,8 @@ export function CrawlerPage() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current)
     }
-  }, [hasActiveJobs, queryClient])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasActiveJobs])
 
   const triggerMutation = useMutation({
     mutationFn: (body: { url: string; extractReviews: boolean }) =>
