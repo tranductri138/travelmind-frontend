@@ -10,6 +10,7 @@ node_modules/
 
 # Build output
 dist/
+run.sh
 
 # IDE, OS
 .idea/
