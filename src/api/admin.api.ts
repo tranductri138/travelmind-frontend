@@ -10,6 +10,6 @@ export interface DashboardStats {
 
 export const adminApi = {
   stats() {
-    return apiClient.get<DashboardStats>('/admin/stats')
+    return apiClient.get<{ success: boolean; data: DashboardStats }>('/admin/stats')
   },
 }
