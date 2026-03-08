@@ -10,6 +10,7 @@ export interface Room {
   amenities: string[]
   images: string[]
   isActive: boolean
+  hotel?: import('./hotel').Hotel
   createdAt: string
   updatedAt: string
 }

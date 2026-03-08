@@ -11,6 +11,14 @@ export function useBookings(params?: { page?: number; limit?: number; status?: s
   })
 }
 
+export function useAdminBookings(params?: { page?: number; limit?: number; status?: string }) {
+  return useQuery({
+    queryKey: [...queryKeys.bookings.all, 'admin', params],
+    queryFn: () => bookingApi.listAdmin(params).then((r) => r.data),
+    placeholderData: keepPreviousData,
+  })
+}
+
 export function useBookingDetail(id: string) {
   return useQuery({
     queryKey: queryKeys.bookings.detail(id),

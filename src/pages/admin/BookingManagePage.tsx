@@ -6,13 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pagination } from '@/components/common/Pagination'
 import { TableSkeleton } from '@/components/common/LoadingSkeleton'
-import { useBookings, useDeleteBooking } from '@/hooks/useBookings'
+import { useAdminBookings, useDeleteBooking } from '@/hooks/useBookings'
 import { formatDate, formatCurrency } from '@/lib/format'
 
 export function BookingManagePage() {
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('all')
-  const { data, isLoading } = useBookings({
+  const { data, isLoading } = useAdminBookings({
     page,
     limit: 15,
     status: status === 'all' ? undefined : status,
@@ -55,7 +55,7 @@ export function BookingManagePage() {
             <TableBody>
               {data?.data.map((booking) => (
                 <TableRow key={booking.id}>
-                  <TableCell className="font-medium">{booking.hotel?.name || 'N/A'}</TableCell>
+                  <TableCell className="font-medium">{booking.room?.hotel?.name || 'N/A'}</TableCell>
                   <TableCell>{formatDate(booking.checkIn)}</TableCell>
                   <TableCell>{formatDate(booking.checkOut)}</TableCell>
                   <TableCell><Badge variant="outline">{booking.status}</Badge></TableCell>
