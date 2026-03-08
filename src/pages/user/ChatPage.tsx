@@ -95,8 +95,8 @@ export function ChatPage() {
       {/* Sidebar */}
       <div
         className={cn(
-          'border-r bg-muted/30 transition-all duration-300 overflow-hidden',
-          sidebarOpen ? 'w-72' : 'w-0',
+          'border-r bg-muted/30 transition-all duration-300 overflow-hidden shrink-0',
+          sidebarOpen ? 'w-72 min-w-[18rem] max-w-[18rem]' : 'w-0 min-w-0',
         )}
       >
         <ConversationList
