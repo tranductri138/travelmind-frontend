@@ -1,31 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Hotel, CalendarDays, Users, DollarSign } from 'lucide-react'
-import { useHotels } from '@/hooks/useHotels'
-import { useBookings } from '@/hooks/useBookings'
+import { useDashboardStats } from '@/hooks/useAdmin'
 
 export function DashboardPage() {
-  const { data: hotelsData } = useHotels({ limit: 1 })
-  const { data: bookingsData } = useBookings({ limit: 1 })
+  const { data: stats } = useDashboardStats()
 
   const metrics = [
     {
       title: 'Total Hotels',
-      value: hotelsData?.meta?.total || 0,
+      value: stats?.totalHotels ?? 0,
       icon: Hotel,
     },
     {
       title: 'Total Bookings',
-      value: bookingsData?.meta?.total || 0,
+      value: stats?.totalBookings ?? 0,
       icon: CalendarDays,
     },
     {
       title: 'Active Users',
-      value: '-',
+      value: stats?.totalUsers ?? 0,
       icon: Users,
     },
     {
       title: 'Revenue',
-      value: '-',
+      value: stats?.revenue != null
+        ? `$${stats.revenue.toLocaleString()}`
+        : '$0',
       icon: DollarSign,
     },
   ]
