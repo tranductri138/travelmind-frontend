@@ -1,4 +1,4 @@
-import { Bot, User } from 'lucide-react'
+import { Sparkles, User } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/cn'
@@ -19,7 +19,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           isUser ? 'bg-primary text-primary-foreground' : 'bg-muted',
         )}
       >
-        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+        {isUser ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
       </div>
       <div
         className={cn(

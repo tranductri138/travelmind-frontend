@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { Bot, Loader2, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { Sparkles, Loader2, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChatMessage } from '@/components/chat/ChatMessage'
@@ -125,7 +125,7 @@ export function ChatPage() {
             )}
           </Button>
           <div className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-primary" />
             <h2 className="font-semibold">TravelMind AI</h2>
           </div>
         </div>
@@ -135,7 +135,9 @@ export function ChatPage() {
           <div className="max-w-3xl mx-auto space-y-4">
             {messages.length === 0 && !isTyping && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Bot className="h-12 w-12 text-muted-foreground mb-4" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
                 <h3 className="text-lg font-semibold mb-2">TravelMind AI Assistant</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
                   Ask me about hotels, check availability, get recommendations,
